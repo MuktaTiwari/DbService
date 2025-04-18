@@ -95,10 +95,10 @@ const LandingPage = () => {
       <Navbar>
         <Container maxWidth="lg">
           <NavContent>
-            <Typography
-              variant="h5"
-              sx={{
-                color: 'var(--text-primary)',
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                color: 'var(--text-primary)', 
                 fontWeight: 600,
                 cursor: 'pointer',
                 '&:hover': { color: 'var(--primary-color)' }
@@ -110,7 +110,7 @@ const LandingPage = () => {
             <NavButtons>
               <Button
                 variant="outlined"
-                sx={{
+                sx={{ 
                   borderColor: 'var(--primary-color)',
                   color: 'var(--primary-color)',
                   textTransform: 'none',
@@ -127,7 +127,7 @@ const LandingPage = () => {
               </Button>
               <Button
                 variant="contained"
-                sx={{
+                sx={{ 
                   bgcolor: 'var(--primary-color)',
                   color: 'var(--primary-text)',
                   textTransform: 'none',
@@ -148,20 +148,20 @@ const LandingPage = () => {
 
       <MainContent>
         <Container maxWidth="lg">
-          <Grid
-            container
-            spacing={8}
-            alignItems="center"
+          <Grid 
+            container 
+            spacing={8} 
+            alignItems="center" 
             justifyContent="space-between"
-            sx={{ minHeight: 'calc(100vh - 200px)', flexWrap: 'nowrap', marginRight: '244px' }}
+            sx={{ minHeight: 'calc(100vh - 200px)', flexWrap: 'nowrap', marginRight: '244px'}}
           >
             <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
               <ContentContainer>
-                <Typography
-                  variant="h3"
-                  component="h1"
-                  gutterBottom
-                  sx={{
+                <Typography 
+                  variant="h3" 
+                  component="h1" 
+                  gutterBottom 
+                  sx={{ 
                     fontWeight: 700,
                     color: 'var(--text-primary)',
                     mb: 3,
@@ -171,9 +171,9 @@ const LandingPage = () => {
                 >
                   Why do we use it?
                 </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
                     color: 'var(--text-secondary)',
                     mb: 4,
                     fontSize: '1.125rem',
@@ -185,7 +185,7 @@ const LandingPage = () => {
                 <ButtonGroup>
                   <Button
                     variant="contained"
-                    sx={{
+                    sx={{ 
                       bgcolor: 'var(--primary-color)',
                       color: 'var(--primary-text)',
                       textTransform: 'none',
@@ -207,8 +207,8 @@ const LandingPage = () => {
 
             <Grid item xs={12} md={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <ImageContainer>
-                <img
-                  src="/assets/images/1.png"
+                <img 
+                  src="/assets/images/1.png" 
                   alt="Landing page illustration"
                   style={{ maxWidth: '160%', height: 'auto', animation: 'float 6s ease-in-out infinite' }}
                 />

@@ -95,7 +95,7 @@ const DatabaseDetails = () => {
 
       setSnackbar({
         open: true,
-        message: response.data?.message,
+        message: response.data?.message || 'Table updated successfully!',
         severity: 'success'
       });
     } catch (error) {
@@ -496,25 +496,24 @@ const DatabaseDetails = () => {
                         </TableCell>
                         <TableCell>
                           <IconButton
-                            aria-label="more"
-                            aria-controls={`table-menu-${table.tablename}`}
-                            aria-haspopup="true"
-                            onClick={(e) => handleMenuOpen(e, table)}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
-                          <IconButton
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEditTable(dbName, table.tablename);
                             }}
                             sx={{
                               color: 'var(--primary-color)',
-                              mr: 1,
-                              float: 'right'
+                              mr: 1
                             }}
                           >
                             <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            aria-label="more"
+                            aria-controls={`table-menu-${table.tablename}`}
+                            aria-haspopup="true"
+                            onClick={(e) => handleMenuOpen(e, table)}
+                          >
+                            <MoreVertIcon />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -524,15 +523,6 @@ const DatabaseDetails = () => {
               </TableContainer>
             </Paper>
           </Box>
-
-          <EditTableDialog
-            open={editDialog.open}
-            onClose={() => setEditDialog({ ...editDialog, open: false })}
-            dbName={editDialog.dbName}
-            tableName={editDialog.tableName}
-            columns={editDialog.columns}
-            onSave={handleSaveTableChanges}  // Make sure this is passed correctly
-          />
 
           <Menu
             id="table-actions-menu"
@@ -547,6 +537,7 @@ const DatabaseDetails = () => {
             <MenuItem onClick={() => handleMenuAction('delete')}>Delete Data</MenuItem>
           </Menu>
 
+          
           <Snackbar
             open={snackbar.open}
             autoHideDuration={6000}
@@ -558,6 +549,16 @@ const DatabaseDetails = () => {
             </Alert>
           </Snackbar>
         </Container>
+
+        <EditTableDialog
+            open={editDialog.open}
+            onClose={() => setEditDialog({ ...editDialog, open: false })}
+            dbName={editDialog.dbName}
+            tableName={editDialog.tableName}
+            columns={editDialog.columns}
+            onSave={handleSaveTableChanges}  // Make sure this is passed correctly
+          />
+
       </Box>
     </Box>
   );

@@ -9,7 +9,7 @@ import {
 import {
   Menu as MenuIcon, Settings as SettingsIcon,
   Storage as StorageIcon, Delete as DeleteIcon,
-  Visibility as VisibilityIcon, ContentCopy as ContentCopyIcon
+  Visibility as VisibilityIcon, ContentCopy as ContentCopyIcon, Edit as EditIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -17,6 +17,7 @@ import AddDatabaseDialog from './AddDatabaseDialog';
 import CreateTableDialog from './CreateTableDialog';
 import { styled } from '@mui/material/styles';
 import { Person as PersonIcon } from '@mui/icons-material';
+import EditTableDialog from './EditTableDialog';
 
 const drawerWidth = 240;
 
@@ -54,6 +55,14 @@ const UserDashboard = () => {
     name: '',
     dbName: ''
   });
+
+  const [editDialog, setEditDialog] = useState({
+    open: false,
+    dbName: '',
+    tableName: '',
+    columns: []
+  });
+
 
   useEffect(() => {
     fetchDatabases();
@@ -335,6 +344,72 @@ const UserDashboard = () => {
     navigate(`/database/${dbName}`);
   };
 
+
+
+
+  const handleEditTable = (dbName, tableName) => {
+    // First fetch the current columns for the table
+    axios.get(`http://localhost:5000/api/databases/${dbName}/tables/${tableName}/columns`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(response => {
+        setEditDialog({
+          open: true,
+          dbName,
+          tableName,
+          columns: response.data
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching table columns:', error);
+        setSnackbar({
+          open: true,
+          message: error.response?.data?.error || 'Failed to fetch table columns',
+          severity: 'error'
+        });
+      });
+  };
+
+  // Add this function to handle saving the edited table
+  const handleSaveTableChanges = async (dbName, tableName, columns) => {
+    try {
+      setSnackbar({
+        open: true,
+        message: 'Updating table structure...',
+        severity: 'info',
+        autoHideDuration: null
+      });
+
+      await axios.put(
+        `http://localhost:5000/api/databases/${dbName}/tables/${tableName}`,
+        { columns },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      setSnackbar({
+        open: true,
+        message: 'Table updated successfully!',
+        severity: 'success'
+      });
+
+      // Refresh the databases list to reflect changes
+      fetchDatabases();
+    } catch (error) {
+      console.error('Error updating table:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Failed to update table',
+        severity: 'error'
+      });
+    }
+  };
+
   const drawer = (
     <div style={{ backgroundColor: 'var(--bg-paper)' }}>
       <Toolbar>
@@ -493,7 +568,10 @@ const UserDashboard = () => {
                             >
                               <Typography
                                 variant="body2"
-
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/database/${db.name}/table/${table}`);
+                                }}
                                 sx={{
                                   cursor: 'pointer',
                                   color: 'var(--primary-color)',
@@ -571,6 +649,22 @@ const UserDashboard = () => {
                           >
                             <DeleteIcon />
                           </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Find the first table in this database to edit
+                              const firstTable = db.tables.length > 0 ? db.tables[0] : '';
+                              handleEditTable(db.name, firstTable);
+                            }}
+                            sx={{
+                              color: 'var(--primary-color)',
+                              ml: 0.5,
+                              p: 0.5
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -596,6 +690,16 @@ const UserDashboard = () => {
           dbName={selectedDatabase}
           onSubmit={handleCreateTable}
         />
+
+        <EditTableDialog
+          open={editDialog.open}
+          onClose={() => setEditDialog({ ...editDialog, open: false })}
+          dbName={editDialog.dbName}
+          tableName={editDialog.tableName}
+          columns={editDialog.columns}
+          onSave={handleSaveTableChanges}
+        />
+
 
         <Dialog open={openApiKeyDialog} onClose={() => setOpenApiKeyDialog(false)}>
           <DialogTitle style={{ color: 'var(--text-primary)' }}>API Key</DialogTitle>

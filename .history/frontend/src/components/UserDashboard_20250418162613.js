@@ -17,6 +17,7 @@ import AddDatabaseDialog from './AddDatabaseDialog';
 import CreateTableDialog from './CreateTableDialog';
 import { styled } from '@mui/material/styles';
 import { Person as PersonIcon } from '@mui/icons-material';
+import 
 
 const drawerWidth = 240;
 
@@ -55,6 +56,14 @@ const UserDashboard = () => {
     dbName: ''
   });
 
+  const [editDialog, setEditDialog] = useState({
+    open: false,
+    dbName: '',
+    tableName: '',
+    columns: []
+  });
+  
+
   useEffect(() => {
     fetchDatabases();
   }, []);
@@ -66,14 +75,14 @@ const UserDashboard = () => {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-
+      
       const transformedData = response.data.map(db => ({
         name: db.dbname,
         tables: db.tables.filter(t => t.tablename).map(t => t.tablename),
         apiKey: db.apikey,
         dbid: db.dbid
       }));
-
+      
       setDatabases(transformedData);
     } catch (error) {
       console.error('Error fetching databases:', error);
@@ -93,13 +102,13 @@ const UserDashboard = () => {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-
+      
       setSnackbar({
         open: true,
         message: 'Database deleted successfully!',
         severity: 'success'
       });
-
+      
       setDeleteDialog({ ...deleteDialog, open: false });
       fetchDatabases();
     } catch (error) {
@@ -122,13 +131,13 @@ const UserDashboard = () => {
           }
         }
       );
-
+      
       setSnackbar({
         open: true,
         message: 'Table deleted successfully!',
         severity: 'success'
       });
-
+      
       setDeleteDialog({ ...deleteDialog, open: false });
       fetchDatabases();
     } catch (error) {
@@ -158,7 +167,7 @@ const UserDashboard = () => {
         severity: 'info',
         autoHideDuration: null
       });
-
+  
       const response = await axios.post(
         `http://localhost:5000/api/databases/${dbName}/create-table`,
         formData,
@@ -169,13 +178,13 @@ const UserDashboard = () => {
           }
         }
       );
-
+  
       setSnackbar({
         open: true,
         message: 'Table created successfully!',
         severity: 'success'
       });
-
+  
       setDatabases(prevDatabases => {
         return prevDatabases.map(db => {
           if (db.name === dbName) {
@@ -188,7 +197,7 @@ const UserDashboard = () => {
           return db;
         });
       });
-
+  
     } catch (error) {
       console.error('Error creating table:', error);
       setSnackbar({
@@ -228,7 +237,7 @@ const UserDashboard = () => {
       });
       return;
     }
-
+  
     const hasColumns = formDataWithColumns.columns && formDataWithColumns.columns.some(col => col.name.trim());
     if (!hasColumns && !formDataWithColumns.csvFile) {
       setSnackbar({
@@ -238,7 +247,7 @@ const UserDashboard = () => {
       });
       return;
     }
-
+  
     if (hasColumns) {
       for (const column of formDataWithColumns.columns) {
         if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(column.name)) {
@@ -251,27 +260,27 @@ const UserDashboard = () => {
         }
       }
     }
-
+  
     try {
       const formData = new FormData();
       formData.append('databaseName', formDataWithColumns.databaseName);
       formData.append('tableName', formDataWithColumns.tableName);
-
+      
       if (formDataWithColumns.csvFile) {
         formData.append('csvFile', formDataWithColumns.csvFile);
       }
-
+      
       if (formDataWithColumns.columns && formDataWithColumns.columns.length > 0) {
         formData.append('columns', JSON.stringify(formDataWithColumns.columns));
       }
-
+  
       setSnackbar({
         open: true,
         message: 'Creating database...',
         severity: 'info',
         autoHideDuration: null
       });
-
+  
       const response = await axios.post('http://localhost:5000/api/databases', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -279,31 +288,31 @@ const UserDashboard = () => {
         },
         timeout: 30000
       });
-
+  
       setSnackbar({
         open: true,
         message: 'Database created successfully!',
         severity: 'success'
       });
-
+  
       await fetchDatabases();
       handleCloseDialog();
-
+  
       if (response.data.apiKey) {
         setCurrentApiKey(response.data.apiKey);
         setOpenApiKeyDialog(true);
       }
-
+  
     } catch (error) {
       console.error('Error creating database:', error);
-
+      
       let errorMessage = 'Error creating database';
       if (error.response) {
         errorMessage = error.response.data.error || error.response.data.message || errorMessage;
       } else if (error.message) {
         errorMessage = error.message;
       }
-
+  
       setSnackbar({
         open: true,
         message: errorMessage,
@@ -335,6 +344,72 @@ const UserDashboard = () => {
     navigate(`/database/${dbName}`);
   };
 
+
+
+
+  const handleEditTable = (dbName, tableName) => {
+    // First fetch the current columns for the table
+    axios.get(`http://localhost:5000/api/databases/${dbName}/tables/${tableName}/columns`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    .then(response => {
+      setEditDialog({
+        open: true,
+        dbName,
+        tableName,
+        columns: response.data
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching table columns:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Failed to fetch table columns',
+        severity: 'error'
+      });
+    });
+  };
+  
+  // Add this function to handle saving the edited table
+  const handleSaveTableChanges = async (dbName, tableName, columns) => {
+    try {
+      setSnackbar({
+        open: true,
+        message: 'Updating table structure...',
+        severity: 'info',
+        autoHideDuration: null
+      });
+  
+      await axios.put(
+        `http://localhost:5000/api/databases/${dbName}/tables/${tableName}`,
+        { columns },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+  
+      setSnackbar({
+        open: true,
+        message: 'Table updated successfully!',
+        severity: 'success'
+      });
+  
+      // Refresh the databases list to reflect changes
+      fetchDatabases();
+    } catch (error) {
+      console.error('Error updating table:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Failed to update table',
+        severity: 'error'
+      });
+    }
+  };
+
   const drawer = (
     <div style={{ backgroundColor: 'var(--bg-paper)' }}>
       <Toolbar>
@@ -342,8 +417,8 @@ const UserDashboard = () => {
       </Toolbar>
       <Divider style={{ backgroundColor: 'var(--border-color)' }} />
       <List>
-        <ListItem
-          button
+        <ListItem 
+          button 
           onClick={() => navigate('/UserDashboard')}
           style={{ color: 'var(--text-primary)' }}
         >
@@ -355,10 +430,10 @@ const UserDashboard = () => {
   );
 
   return (
-    <Box sx={{
-      display: 'flex',
-      backgroundColor: 'var(--bg-secondary)',
-      minHeight: '100vh'
+    <Box sx={{ 
+      display: 'flex', 
+      backgroundColor: 'var(--bg-secondary)', 
+      minHeight: '100vh' 
     }}>
       <AppBar
         position="fixed"
@@ -379,8 +454,8 @@ const UserDashboard = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" sx={{ flexGrow: 1, color: '#ffffff' }}>
-            User Dashboard
-          </Typography>
+  User Dashboard
+</Typography>
 
           <IconButton color="inherit"><SettingsIcon /></IconButton>
         </Toolbar>
@@ -392,24 +467,24 @@ const UserDashboard = () => {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
+          sx={{ 
+            display: { xs: 'block', sm: 'none' }, 
+            '& .MuiDrawer-paper': { 
               width: drawerWidth,
               backgroundColor: 'var(--bg-paper)'
-            }
+            } 
           }}
         >
           {drawer}
         </Drawer>
         <Drawer
           variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
+          sx={{ 
+            display: { xs: 'none', sm: 'block' }, 
+            '& .MuiDrawer-paper': { 
               width: drawerWidth,
               backgroundColor: 'var(--bg-paper)'
-            }
+            } 
           }}
           open
         >
@@ -417,9 +492,9 @@ const UserDashboard = () => {
         </Drawer>
       </Box>
 
-      <Box component="main" sx={{
-        flexGrow: 1,
-        p: 3,
+      <Box component="main" sx={{ 
+        flexGrow: 1, 
+        p: 3, 
         width: { sm: `calc(100% - ${drawerWidth}px)` },
         backgroundColor: 'var(--bg-secondary)'
       }}>
@@ -450,134 +525,151 @@ const UserDashboard = () => {
               Your Databases
             </Typography>
             <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell style={{ color: 'var(--text-primary)' }}>Database Name</TableCell>
-                    <TableCell style={{ color: 'var(--text-primary)' }}>Tables</TableCell>
-                    <TableCell style={{ color: 'var(--text-primary)' }}>API Key</TableCell>
-                    <TableCell style={{ color: 'var(--text-primary)' }} align="right">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {databases.map((db) => (
-                    <TableRow
-                      key={db.name}
-                      hover
-                      sx={{
-                        cursor: 'pointer',
-                        '&:hover': {
-                          backgroundColor: 'var(--primary-light-hover)'
-                        }
-                      }}
-                    >
-                      <TableCell
-                        onClick={() => handleRowClick(db.name)}
-                        style={{ color: 'var(--text-primary)' }}
-                      >
-                        {db.name}
-                      </TableCell>
-                      <TableCell onClick={() => handleRowClick(db.name)}>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {db.tables.map((table) => (
-                            <Box
-                              key={table}
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                backgroundColor: 'var(--primary-light)',
-                                borderRadius: 1,
-                                px: 1,
-                                py: 0.5
-                              }}
-                            >
-                              <Typography
-                                variant="body2"
-
-                                sx={{
-                                  cursor: 'pointer',
-                                  color: 'var(--primary-color)',
-                                  '&:hover': {
-                                    textDecoration: 'underline'
-                                  }
-                                }}
-                              >
-                                {table}
-                              </Typography>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteClick('table', table, db.name);
-                                }}
-                                sx={{
-                                  color: 'var(--error-color)',
-                                  ml: 0.5,
-                                  p: 0.5
-                                }}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          ))}
-                        </Box>
-                      </TableCell>
-                      <TableCell onClick={() => handleRowClick(db.name)}>
-                        {db.apiKey && (
-                          <Button
-                            variant="outlined"
-                            startIcon={<VisibilityIcon />}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleShowApiKey(db.apiKey);
-                            }}
-                            sx={{
-                              textTransform: 'none',
-                              borderColor: 'var(--primary-color)',
-                              color: 'var(--primary-color)',
-                              '&:hover': {
-                                borderColor: 'var(--primary-hover)',
-                              },
-                            }}
-                          >
-                            Show API Key
-                          </Button>
-                        )}
-                      </TableCell>
-                      <TableCell align="right">
-                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                          <Button
-                            variant="contained"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedDatabase(db.name);
-                              setOpenTableDialog(true);
-                            }}
-                            sx={{
-                              backgroundColor: 'var(--primary-color)',
-                              '&:hover': {
-                                backgroundColor: 'var(--primary-hover)',
-                              },
-                            }}
-                          >
-                            Create Table
-                          </Button>
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteClick('database', db.name);
-                            }}
-                            sx={{ color: 'var(--error-color)' }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+  <Table>
+    <TableHead>
+      <TableRow>
+        <TableCell style={{ color: 'var(--text-primary)' }}>Database Name</TableCell>
+        <TableCell style={{ color: 'var(--text-primary)' }}>Tables</TableCell>
+        <TableCell style={{ color: 'var(--text-primary)' }}>API Key</TableCell>
+        <TableCell style={{ color: 'var(--text-primary)' }} align="right">Actions</TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {databases.map((db) => (
+        <TableRow 
+          key={db.name}
+          hover
+          sx={{ 
+            cursor: 'pointer',
+            '&:hover': {
+              backgroundColor: 'var(--primary-light-hover)'
+            }
+          }}
+        >
+          <TableCell 
+            onClick={() => handleRowClick(db.name)}
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {db.name}
+          </TableCell>
+          <TableCell onClick={() => handleRowClick(db.name)}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {db.tables.map((table) => (
+                <Box 
+                  key={table} 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    backgroundColor: 'var(--primary-light)',
+                    borderRadius: 1,
+                    px: 1,
+                    py: 0.5
+                  }}
+                >
+                  <Typography 
+                    variant="body2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/database/${db.name}/table/${table}`);
+                    }}
+                    sx={{
+                      cursor: 'pointer',
+                      color: 'var(--primary-color)',
+                      '&:hover': {
+                        textDecoration: 'underline'
+                      }
+                    }}
+                  >
+                    {table}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick('table', table, db.name);
+                    }}
+                    sx={{ 
+                      color: 'var(--error-color)',
+                      ml: 0.5,
+                      p: 0.5
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
+          </TableCell>
+          <TableCell onClick={() => handleRowClick(db.name)}>
+            {db.apiKey && (
+              <Button
+                variant="outlined"
+                startIcon={<VisibilityIcon />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleShowApiKey(db.apiKey);
+                }}
+                sx={{
+                  textTransform: 'none',
+                  borderColor: 'var(--primary-color)',
+                  color: 'var(--primary-color)',
+                  '&:hover': {
+                    borderColor: 'var(--primary-hover)',
+                  },
+                }}
+              >
+                Show API Key
+              </Button>
+            )}
+          </TableCell>
+          <TableCell align="right">
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+              <Button
+                variant="contained"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedDatabase(db.name);
+                  setOpenTableDialog(true);
+                }}
+                sx={{
+                  backgroundColor: 'var(--primary-color)',
+                  '&:hover': {
+                    backgroundColor: 'var(--primary-hover)',
+                  },
+                }}
+              >
+                Create Table
+              </Button>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteClick('database', db.name);
+                }}
+                sx={{ color: 'var(--error-color)' }}
+              >
+                <DeleteIcon />
+              </IconButton>
+              <IconButton
+  size="small"
+  onClick={(e) => {
+    e.stopPropagation();
+    handleEditTable(db.name, table);
+  }}
+  sx={{ 
+    color: 'var(--primary-color)',
+    ml: 0.5,
+    p: 0.5
+  }}
+>
+  <EditIcon fontSize="small" />
+</IconButton>
+            </Box>
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</TableContainer>
           </StyledPaper>
         </Container>
 
@@ -591,11 +683,21 @@ const UserDashboard = () => {
         />
 
         <CreateTableDialog
-          open={openTableDialog}
-          onClose={() => setOpenTableDialog(false)}
-          dbName={selectedDatabase}
-          onSubmit={handleCreateTable}
+            open={openTableDialog}
+            onClose={() => setOpenTableDialog(false)}
+            dbName={selectedDatabase}
+            onSubmit={handleCreateTable}
         />
+
+<EditTableDialog
+  open={editDialog.open}
+  onClose={() => setEditDialog({...editDialog, open: false})}
+  dbName={editDialog.dbName}
+  tableName={editDialog.tableName}
+  columns={editDialog.columns}
+  onSave={handleSaveTableChanges}
+/>
+
 
         <Dialog open={openApiKeyDialog} onClose={() => setOpenApiKeyDialog(false)}>
           <DialogTitle style={{ color: 'var(--text-primary)' }}>API Key</DialogTitle>
@@ -616,7 +718,7 @@ const UserDashboard = () => {
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button
+            <Button 
               onClick={() => setOpenApiKeyDialog(false)}
               sx={{
                 color: 'var(--text-primary)',
@@ -649,12 +751,12 @@ const UserDashboard = () => {
           </DialogTitle>
           <DialogContent>
             <DialogContentText style={{ color: 'var(--text-primary)' }}>
-              Are you sure you want to delete {deleteDialog.type} "{deleteDialog.name}"?
+              Are you sure you want to delete {deleteDialog.type} "{deleteDialog.name}"? 
               This action cannot be undone.
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button
+            <Button 
               onClick={() => setDeleteDialog({ ...deleteDialog, open: false })}
               sx={{
                 color: 'var(--text-primary)',
@@ -687,15 +789,15 @@ const UserDashboard = () => {
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity={snackbar.severity}
-            sx={{
+          <Alert 
+            onClose={handleCloseSnackbar} 
+            severity={snackbar.severity} 
+            sx={{ 
               width: '100%',
-              backgroundColor: snackbar.severity === 'error' ? 'var(--error-color)' :
-                snackbar.severity === 'success' ? 'var(--success-color)' :
-                  snackbar.severity === 'warning' ? 'var(--warning-color)' :
-                    'var(--info-color)',
+              backgroundColor: snackbar.severity === 'error' ? 'var(--error-color)' : 
+                             snackbar.severity === 'success' ? 'var(--success-color)' :
+                             snackbar.severity === 'warning' ? 'var(--warning-color)' :
+                             'var(--info-color)',
               color: 'white'
             }}
           >

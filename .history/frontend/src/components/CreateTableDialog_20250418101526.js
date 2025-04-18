@@ -26,8 +26,8 @@ import {
   Autocomplete,
   CircularProgress
 } from '@mui/material';
-import {
-  Close as CloseIcon,
+import { 
+  Close as CloseIcon, 
   CloudUpload as CloudUploadIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -85,18 +85,18 @@ const dataTypes = [
 const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
   const [tableName, setTableName] = useState('');
   const [csvFile, setCsvFile] = useState(null);
-  const [columns, setColumns] = useState([{
-    name: '',
-    type: 'TEXT',
-    isPrimary: false,
-    isNotNull: false,
-    isUnique: false,
+  const [columns, setColumns] = useState([{ 
+    name: '', 
+    type: 'TEXT', 
+    isPrimary: false, 
+    isNotNull: false, 
+    isUnique: false, 
     defaultValue: '',
     isForeignKey: false,
     foreignKeyTable: '',
     foreignKeyColumn: ''
   }]);
-
+  
   const [availableTables, setAvailableTables] = useState([]);
   const [tableColumnsCache, setTableColumnsCache] = useState({});
   const [loadingTables, setLoadingTables] = useState(false);
@@ -117,7 +117,7 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-
+      
       const tableNames = response.data.map(table => table.tablename).filter(name => name);
       setAvailableTables(tableNames);
     } catch (error) {
@@ -130,7 +130,7 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
 
   const fetchTableColumns = async (tableName) => {
     if (!tableName) return [];
-
+    
     setLoadingColumns(true);
     try {
       const response = await axios.get(
@@ -141,13 +141,13 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
           }
         }
       );
-
+      
       const columnNames = response.data.map(col => col.column_name);
       setTableColumnsCache(prev => ({
         ...prev,
         [tableName]: columnNames
       }));
-
+      
       return columnNames;
     } catch (error) {
       console.error(`Failed to fetch columns for table ${tableName}:`, error);
@@ -160,7 +160,7 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
   const handleForeignKeyTableSelect = async (index, tableName) => {
     handleColumnChange(index, 'foreignKeyColumn', '');
     handleColumnChange(index, 'foreignKeyTable', tableName);
-
+    
     if (!tableColumnsCache[tableName]) {
       const columns = await fetchTableColumns(tableName);
       setTableColumnsCache(prev => ({
@@ -171,12 +171,12 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
   };
 
   const handleAddColumn = () => {
-    setColumns([...columns, {
-      name: '',
-      type: 'TEXT',
-      isPrimary: false,
-      isNotNull: false,
-      isUnique: false,
+    setColumns([...columns, { 
+      name: '', 
+      type: 'TEXT', 
+      isPrimary: false, 
+      isNotNull: false, 
+      isUnique: false, 
       defaultValue: '',
       isForeignKey: false,
       foreignKeyTable: '',
@@ -192,16 +192,16 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
 
   const handleColumnChange = (index, field, value) => {
     const newColumns = [...columns];
-
+    
     if (field === 'isPrimary' && value === true) {
       newColumns.forEach(col => col.isPrimary = false);
     }
-
+    
     if (field === 'isForeignKey' && value === false) {
       newColumns[index].foreignKeyTable = '';
       newColumns[index].foreignKeyColumn = '';
     }
-
+    
     newColumns[index][field] = value;
     setColumns(newColumns);
   };
@@ -222,18 +222,18 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
       alert('Table name is required');
       return;
     }
-
+    
     if (columns.every(col => !col.name.trim()) && !csvFile) {
       alert('Either define columns or upload a CSV file');
       return;
     }
-
+    
     for (const column of columns) {
       if (column.name.trim() && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(column.name)) {
         alert('Column names must start with a letter or underscore and contain only letters, numbers, and underscores');
         return;
       }
-
+      
       if (column.isForeignKey) {
         if (!column.foreignKeyTable || !column.foreignKeyColumn) {
           alert('Please specify both table and column for foreign key constraints');
@@ -241,7 +241,7 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
         }
       }
     }
-
+    
     const filteredColumns = columns.filter(col => col.name.trim()).map(col => ({
       name: col.name,
       type: col.type,
@@ -253,14 +253,14 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
       foreignKeyTable: col.foreignKeyTable,
       foreignKeyColumn: col.foreignKeyColumn
     }));
-
+    
     const formData = new FormData();
     formData.append('tableName', tableName);
     formData.append('columns', JSON.stringify(filteredColumns));
     if (csvFile) {
       formData.append('csvFile', csvFile);
     }
-
+    
     setIsSubmitting(true);
     try {
       await onSubmit(dbName, formData);
@@ -277,12 +277,12 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
   const resetForm = () => {
     setTableName('');
     setCsvFile(null);
-    setColumns([{
-      name: '',
-      type: 'TEXT',
-      isPrimary: false,
-      isNotNull: false,
-      isUnique: false,
+    setColumns([{ 
+      name: '', 
+      type: 'TEXT', 
+      isPrimary: false, 
+      isNotNull: false, 
+      isUnique: false, 
       defaultValue: '',
       isForeignKey: false,
       foreignKeyTable: '',
@@ -291,10 +291,10 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
   };
 
   return (
-    <StyledDialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
+    <StyledDialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
       fullWidth
       sx={{
         '& .MuiDialog-container': {
@@ -314,7 +314,7 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
           <CloseIcon />
         </IconButton>
       </StyledDialogTitle>
-      <DialogContent dividers sx={{
+      <DialogContent dividers sx={{ 
         maxHeight: '70vh',
         overflowY: 'auto'
       }}>
@@ -337,7 +337,7 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
               <Typography variant="subtitle1" gutterBottom>
                 Table Columns (Optional - define or upload CSV)
               </Typography>
-              <Box sx={{
+              <Box sx={{ 
                 maxHeight: '300px',
                 overflowY: 'auto',
                 border: '1px solid var(--border-color)',
@@ -467,7 +467,7 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
                         <TableCell align="right">
                           <Tooltip title="Remove column">
                             <span>
-                              <MuiIconButton
+                              <MuiIconButton 
                                 onClick={() => handleRemoveColumn(index)}
                                 disabled={isSubmitting}
                               >
@@ -482,8 +482,8 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
                 </Table>
               </Box>
               <Box sx={{ mt: 1 }}>
-                <Button
-                  startIcon={<AddIcon />}
+                <Button 
+                  startIcon={<AddIcon />} 
                   onClick={handleAddColumn}
                   variant="outlined"
                   disabled={isSubmitting}
@@ -539,11 +539,11 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button
-          onClick={onClose}
-          color="inherit"
+        <Button 
+          onClick={onClose} 
+          color="inherit" 
           disabled={isSubmitting}
-          sx={{
+          sx={{ 
             borderRadius: 'var(--border-radius)',
             borderColor: 'var(--primary-color)',
             color: 'var(--primary-color)',
@@ -555,13 +555,13 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
         >
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
+        <Button 
+          onClick={handleSubmit} 
+          variant="contained" 
           disabled={isSubmitting}
           startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
-          sx={{
-            backgroundColor: 'var(--primary-color)',
+          sx={{ 
+            backgroundColor: 'var(--primary-color)', 
             borderRadius: 'var(--border-radius)',
             '&:hover': {
               backgroundColor: 'var(--primary-hover)',

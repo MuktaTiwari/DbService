@@ -79,16 +79,16 @@ const Organizations = () => {
       </Toolbar>
       <Divider style={{ backgroundColor: 'var(--border-color)' }} />
       <List>
-        <ListItem
-          button
+        <ListItem 
+          button 
           onClick={() => navigate('/dashboard')}
           style={{ color: 'var(--text-primary)' }}
         >
           <ListItemIcon><DashboardIcon style={{ color: 'var(--primary-color)' }} /></ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem
-          button
+        <ListItem 
+          button 
           onClick={() => navigate('/organizations')}
           style={{ color: 'var(--text-primary)' }}
         >
@@ -101,10 +101,10 @@ const Organizations = () => {
 
   if (loading) {
     return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
         height: '100vh',
         backgroundColor: 'var(--bg-secondary)'
       }}>
@@ -122,10 +122,10 @@ const Organizations = () => {
   }
 
   return (
-    <Box sx={{
-      display: 'flex',
-      backgroundColor: 'var(--bg-secondary)',
-      minHeight: '100vh'
+    <Box sx={{ 
+      display: 'flex', 
+      backgroundColor: 'var(--bg-secondary)', 
+      minHeight: '100vh' 
     }}>
       <AppBar
         position="fixed"
@@ -156,24 +156,24 @@ const Organizations = () => {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
+          sx={{ 
+            display: { xs: 'block', sm: 'none' }, 
+            '& .MuiDrawer-paper': { 
               width: drawerWidth,
               backgroundColor: 'var(--bg-paper)'
-            }
+            } 
           }}
         >
           {drawer}
         </Drawer>
         <Drawer
           variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
+          sx={{ 
+            display: { xs: 'none', sm: 'block' }, 
+            '& .MuiDrawer-paper': { 
               width: drawerWidth,
               backgroundColor: 'var(--bg-paper)'
-            }
+            } 
           }}
           open
         >
@@ -181,9 +181,9 @@ const Organizations = () => {
         </Drawer>
       </Box>
 
-      <Box component="main" sx={{
-        flexGrow: 1,
-        p: 3,
+      <Box component="main" sx={{ 
+        flexGrow: 1, 
+        p: 3, 
         width: { sm: `calc(100% - ${drawerWidth}px)` },
         backgroundColor: 'var(--bg-secondary)'
       }}>
@@ -196,7 +196,7 @@ const Organizations = () => {
           <Grid container spacing={3}>
             {users.map((org) => (
               <Grid item xs={12} key={org.organization_name}>
-                <Card sx={{
+                <Card sx={{ 
                   mb: 3,
                   backgroundColor: 'var(--bg-paper)',
                   borderRadius: 'var(--border-radius)',
@@ -213,7 +213,7 @@ const Organizations = () => {
                     action={
                       <Chip
                         label={org.organization_name}
-                        sx={{
+                        sx={{ 
                           ml: 1,
                           backgroundColor: 'var(--primary-light)',
                           color: 'var(--primary-color)',
@@ -268,8 +268,8 @@ const Organizations = () => {
                       ))}
                       {org.users.length === 0 && (
                         <ListItem>
-                          <ListItemText
-                            primary={<Typography style={{ color: 'var(--text-secondary)' }}>No users in this organization</Typography>}
+                          <ListItemText 
+                            primary={<Typography style={{ color: 'var(--text-secondary)' }}>No users in this organization</Typography>} 
                           />
                         </ListItem>
                       )}
@@ -286,10 +286,10 @@ const Organizations = () => {
               <>
                 <DialogTitle style={{ color: 'var(--text-primary)' }}>User Details</DialogTitle>
                 <DialogContent>
-                  <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: 2, 
                     pt: 2,
                     color: 'var(--text-primary)'
                   }}>
@@ -329,7 +329,7 @@ const Organizations = () => {
                   </Box>
                 </DialogContent>
                 <DialogActions>
-                  <Button
+                  <Button 
                     onClick={handleCloseDialog}
                     sx={{
                       color: 'var(--primary-color)',

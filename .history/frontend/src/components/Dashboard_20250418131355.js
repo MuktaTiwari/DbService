@@ -92,8 +92,8 @@ const Dashboard = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.organization || !formData.email ||
-      !formData.name || !formData.username || !formData.password) {
+    if (!formData.organization || !formData.email || 
+        !formData.name || !formData.username || !formData.password) {
       setSnackbar({
         open: true,
         message: 'Please fill in all fields',
@@ -101,7 +101,7 @@ const Dashboard = () => {
       });
       return;
     }
-
+  
     try {
       const response = await axios.post('http://localhost:5000/api/users', {
         name: formData.name,
@@ -114,13 +114,13 @@ const Dashboard = () => {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-
+      
       setSnackbar({
         open: true,
         message: response.data.message,
         severity: 'success'
       });
-
+      
       await fetchUsers();
       handleCloseDialog();
     } catch (error) {
@@ -137,19 +137,19 @@ const Dashboard = () => {
   const handleDeleteUser = async (userId) => {
     try {
       console.log(`Deleting user with ID: ${userId}`);
-
+      
       const response = await axios.delete(`http://localhost:5000/api/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-
+      
       setSnackbar({
         open: true,
         message: 'User deleted successfully',
         severity: 'success'
       });
-
+      
       setUsers(prevUsers => prevUsers.filter(user => user.user_id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -307,13 +307,13 @@ const Dashboard = () => {
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Box sx={{
-                              width: 32,
-                              height: 32,
+                              width: 32, 
+                              height: 32, 
                               borderRadius: '50%',
-                              backgroundColor: 'var(--primary-color)',
+                              backgroundColor: 'var(--primary-color)', 
                               color: 'var(--primary-text)',
-                              display: 'flex',
-                              alignItems: 'center',
+                              display: 'flex', 
+                              alignItems: 'center', 
                               justifyContent: 'center'
                             }}>
                               {user.name?.[0]?.toUpperCase()}
@@ -326,7 +326,7 @@ const Dashboard = () => {
                         <TableCell>{user.organization || ''}</TableCell>
                         <TableCell>{user.created_at ? new Date(user.created_at).toLocaleTimeString() : ''}</TableCell>
                         <TableCell>
-                          <IconButton
+                          <IconButton 
                             onClick={() => handleDeleteUser(user.user_id)}
                             color="error"
                             aria-label="delete user"

@@ -47,28 +47,35 @@ const DatabaseDetails = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     })
-      .then(response => {
-        setEditDialog({
-          open: true,
-          dbName,
-          tableName,
-          columns: response.data
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching table columns:', error);
-        setSnackbar({
-          open: true,
-          message: error.response?.data?.error || 'Failed to fetch table columns',
-          severity: 'error'
-        });
+    .then(response => {
+      setEditDialog({
+        open: true,
+        dbName,
+        tableName,
+        columns: response.data
       });
+    })
+    .catch(error => {
+      console.error('Error fetching table columns:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Failed to fetch table columns',
+        severity: 'error'
+      });
+    });
   };
 
   const handleSaveTableChanges = async (dbName, tableName, columns) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/databases/${dbName}/${tableName}`,
+      setSnackbar({
+        open: true,
+        message: 'Updating table structure...',
+        severity: 'info',
+        autoHideDuration: null
+      });
+
+      await axios.put(
+        `http://localhost:5000/api/databases/${dbName}/tables/${tableName}`,
         { columns },
         {
           headers: {
@@ -77,27 +84,14 @@ const DatabaseDetails = () => {
         }
       );
 
-      // Update the local state to reflect changes immediately
-      setDatabase(prev => {
-        const updatedTables = prev.tables.map(table => {
-          if (table.tablename === tableName) {
-            const schema = {};
-            columns.forEach(col => {
-              schema[col.column_name] = col.data_type;
-            });
-            return { ...table, schema };
-          }
-          return table;
-        });
-
-        return { ...prev, tables: updatedTables };
-      });
-
       setSnackbar({
         open: true,
-        message: response.data?.message,
+        message: 'Table updated successfully!',
         severity: 'success'
       });
+
+      // Refresh the database details
+      fetchDatabaseDetails();
     } catch (error) {
       console.error('Error updating table:', error);
       setSnackbar({
@@ -153,11 +147,11 @@ const DatabaseDetails = () => {
   const generateandCopyUrlByActionType = (dbName, tableName, action) => {
     const baseUrl = process.env.REACT_APP_SERVER_BASE_URL;
     const queryRoute = process.env.REACT_APP_QUERY_ROUTE || '/api/query';
-
+  
     let url = '';
     let method = '';
-
-    switch (action) {
+  
+    switch(action) {
       case 'read':
         url = `${baseUrl}${queryRoute}/${dbName}/${tableName}/get`;
         method = 'POST';
@@ -178,7 +172,7 @@ const DatabaseDetails = () => {
         console.error('Invalid action!!');
         return;
     }
-
+  
     navigator.clipboard.writeText(url)
       .then(() => {
         setSnackbar({
@@ -195,14 +189,14 @@ const DatabaseDetails = () => {
           severity: 'error'
         });
       });
-
+  
     return url;
   };
 
   const handleMenuAction = (action) => {
     generateandCopyUrlByActionType(dbName, currentTable.tablename, action);
     handleMenuClose();
-
+    
     let message = '';
     switch (action) {
       case 'read':
@@ -220,7 +214,7 @@ const DatabaseDetails = () => {
       default:
         message = '';
     }
-
+    
     setSnackbar(prev => ({
       ...prev,
       message: `${prev.message}\n${message}`
@@ -496,25 +490,24 @@ const DatabaseDetails = () => {
                         </TableCell>
                         <TableCell>
                           <IconButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditTable(dbName, table.tablename);
+                            }}
+                            sx={{ 
+                              color: 'var(--primary-color)',
+                              mr: 1
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
                             aria-label="more"
                             aria-controls={`table-menu-${table.tablename}`}
                             aria-haspopup="true"
                             onClick={(e) => handleMenuOpen(e, table)}
                           >
                             <MoreVertIcon />
-                          </IconButton>
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditTable(dbName, table.tablename);
-                            }}
-                            sx={{
-                              color: 'var(--primary-color)',
-                              mr: 1,
-                              float: 'right'
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -527,11 +520,11 @@ const DatabaseDetails = () => {
 
           <EditTableDialog
             open={editDialog.open}
-            onClose={() => setEditDialog({ ...editDialog, open: false })}
+            onClose={() => setEditDialog({...editDialog, open: false})}
             dbName={editDialog.dbName}
             tableName={editDialog.tableName}
             columns={editDialog.columns}
-            onSave={handleSaveTableChanges}  // Make sure this is passed correctly
+            onSave={handleSaveTableChanges}
           />
 
           <Menu

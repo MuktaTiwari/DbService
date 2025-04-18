@@ -25,8 +25,8 @@ import {
   Checkbox,
   FormControlLabel
 } from '@mui/material';
-import {
-  Close as CloseIcon,
+import { 
+  Close as CloseIcon, 
   CloudUpload as CloudUploadIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -96,11 +96,11 @@ const AddDatabaseDialog = ({ open, onClose, formData, onChange, onFileChange, on
 
   const handleColumnChange = (index, field, value) => {
     const newColumns = [...columns];
-
+    
     if (field === 'isPrimary' && value === true) {
       newColumns.forEach(col => col.isPrimary = false);
     }
-
+    
     newColumns[index][field] = value;
     setColumns(newColumns);
   };
@@ -110,32 +110,32 @@ const AddDatabaseDialog = ({ open, onClose, formData, onChange, onFileChange, on
       alert('Database name and table name are required');
       return;
     }
-
+    
     if (columns.every(col => !col.name.trim()) && !formData.csvFile) {
       alert('Either define columns or upload a CSV file');
       return;
     }
-
+    
     for (const column of columns) {
       if (column.name.trim() && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(column.name)) {
         alert('Column names must start with a letter or underscore and contain only letters, numbers, and underscores');
         return;
       }
     }
-
+    
     const filteredColumns = columns.filter(col => col.name.trim());
-
-    onSubmit({
-      ...formData,
-      columns: filteredColumns
+    
+    onSubmit({ 
+      ...formData, 
+      columns: filteredColumns 
     });
   };
 
   return (
-    <StyledDialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
+    <StyledDialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
       fullWidth
       sx={{
         '& .MuiDialog-container': {
@@ -154,7 +154,7 @@ const AddDatabaseDialog = ({ open, onClose, formData, onChange, onFileChange, on
           <CloseIcon />
         </IconButton>
       </StyledDialogTitle>
-      <DialogContent dividers sx={{
+      <DialogContent dividers sx={{ 
         maxHeight: '70vh',
         overflowY: 'auto'
       }}>
@@ -189,7 +189,7 @@ const AddDatabaseDialog = ({ open, onClose, formData, onChange, onFileChange, on
               <Typography variant="subtitle1" gutterBottom>
                 Table Columns (Optional - define or upload CSV)
               </Typography>
-              <Box sx={{
+              <Box sx={{ 
                 maxHeight: '300px',
                 overflowY: 'auto',
                 border: '1px solid var(--border-color)',
@@ -266,7 +266,7 @@ const AddDatabaseDialog = ({ open, onClose, formData, onChange, onFileChange, on
                         </TableCell>
                         <TableCell align="right">
                           <Tooltip title="Remove column">
-                            <MuiIconButton
+                            <MuiIconButton 
                               onClick={() => handleRemoveColumn(index)}
                             >
                               <DeleteIcon />
@@ -279,8 +279,8 @@ const AddDatabaseDialog = ({ open, onClose, formData, onChange, onFileChange, on
                 </Table>
               </Box>
               <Box sx={{ mt: 1 }}>
-                <Button
-                  startIcon={<AddIcon />}
+                <Button 
+                  startIcon={<AddIcon />} 
                   onClick={handleAddColumn}
                   variant="outlined"
                 >
@@ -333,10 +333,10 @@ const AddDatabaseDialog = ({ open, onClose, formData, onChange, onFileChange, on
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button
-          onClick={onClose}
-          color="inherit"
-          sx={{
+        <Button 
+          onClick={onClose} 
+          color="inherit" 
+          sx={{ 
             borderRadius: 'var(--border-radius)',
             borderColor: 'var(--primary-color)',
             color: 'var(--primary-color)',
@@ -348,11 +348,11 @@ const AddDatabaseDialog = ({ open, onClose, formData, onChange, onFileChange, on
         >
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          sx={{
-            backgroundColor: 'var(--primary-color)',
+        <Button 
+          onClick={handleSubmit} 
+          variant="contained" 
+          sx={{ 
+            backgroundColor: 'var(--primary-color)', 
             borderRadius: 'var(--border-radius)',
             '&:hover': {
               backgroundColor: 'var(--primary-hover)',

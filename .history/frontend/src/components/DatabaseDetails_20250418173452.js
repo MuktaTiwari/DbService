@@ -95,7 +95,7 @@ const DatabaseDetails = () => {
 
       setSnackbar({
         open: true,
-        message: response.data?.message,
+        message: response.data?.message || 'Table updated successfully!',
         severity: 'success'
       });
     } catch (error) {
@@ -510,8 +510,7 @@ const DatabaseDetails = () => {
                             }}
                             sx={{
                               color: 'var(--primary-color)',
-                              mr: 1,
-                              float: 'right'
+                              mr: 1
                             }}
                           >
                             <EditIcon fontSize="small" />

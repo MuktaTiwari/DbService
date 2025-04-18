@@ -16,7 +16,9 @@ import {
   MoreVert as MoreVertIcon,
   Edit as EditIcon
 } from '@mui/icons-material';
-import EditTableDialog from './EditTableDialog';
+
+import EditTableDialog from './EditTableDialog';  // Add this import
+
 
 const drawerWidth = 240;
 
@@ -41,34 +43,44 @@ const DatabaseDetails = () => {
     columns: []
   });
 
+
   const handleEditTable = (dbName, tableName) => {
+    // First fetch the current columns for the table
     axios.get(`http://localhost:5000/api/databases/${dbName}/tables/${tableName}/columns`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     })
-      .then(response => {
-        setEditDialog({
-          open: true,
-          dbName,
-          tableName,
-          columns: response.data
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching table columns:', error);
-        setSnackbar({
-          open: true,
-          message: error.response?.data?.error || 'Failed to fetch table columns',
-          severity: 'error'
-        });
+    .then(response => {
+      setEditDialog({
+        open: true,
+        dbName,
+        tableName,
+        columns: response.data
       });
+    })
+    .catch(error => {
+      console.error('Error fetching table columns:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Failed to fetch table columns',
+        severity: 'error'
+      });
+    });
   };
-
+  
+  // Add this function to handle saving the edited table
   const handleSaveTableChanges = async (dbName, tableName, columns) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/databases/${dbName}/${tableName}`,
+      setSnackbar({
+        open: true,
+        message: 'Updating table structure...',
+        severity: 'info',
+        autoHideDuration: null
+      });
+  
+      await axios.put(
+        `http://localhost:5000/api/databases/${dbName}/tables/${tableName}`,
         { columns },
         {
           headers: {
@@ -76,28 +88,20 @@ const DatabaseDetails = () => {
           }
         }
       );
-
-      // Update the local state to reflect changes immediately
-      setDatabase(prev => {
-        const updatedTables = prev.tables.map(table => {
-          if (table.tablename === tableName) {
-            const schema = {};
-            columns.forEach(col => {
-              schema[col.column_name] = col.data_type;
-            });
-            return { ...table, schema };
-          }
-          return table;
-        });
-
-        return { ...prev, tables: updatedTables };
-      });
-
+  
       setSnackbar({
         open: true,
-        message: response.data?.message,
+        message: 'Table updated successfully!',
         severity: 'success'
       });
+  
+      // Refresh the current database details instead of all databases
+      const response = await axios.get(`http://localhost:5000/api/databases/${dbName}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      setDatabase(response.data);
     } catch (error) {
       console.error('Error updating table:', error);
       setSnackbar({
@@ -108,27 +112,28 @@ const DatabaseDetails = () => {
     }
   };
 
-  const fetchDatabaseDetails = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/databases/${dbName}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      setDatabase(response.data);
-    } catch (error) {
-      console.error('Error fetching database details:', error);
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.error || 'Failed to fetch database details',
-        severity: 'error'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   useEffect(() => {
+    const fetchDatabaseDetails = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/databases/${dbName}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setDatabase(response.data);
+      } catch (error) {
+        console.error('Error fetching database details:', error);
+        setSnackbar({
+          open: true,
+          message: error.response?.data?.error || 'Failed to fetch database details',
+          severity: 'error'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchDatabaseDetails();
   }, [dbName]);
 
@@ -153,11 +158,11 @@ const DatabaseDetails = () => {
   const generateandCopyUrlByActionType = (dbName, tableName, action) => {
     const baseUrl = process.env.REACT_APP_SERVER_BASE_URL;
     const queryRoute = process.env.REACT_APP_QUERY_ROUTE || '/api/query';
-
+  
     let url = '';
     let method = '';
-
-    switch (action) {
+  
+    switch(action) {
       case 'read':
         url = `${baseUrl}${queryRoute}/${dbName}/${tableName}/get`;
         method = 'POST';
@@ -178,7 +183,7 @@ const DatabaseDetails = () => {
         console.error('Invalid action!!');
         return;
     }
-
+  
     navigator.clipboard.writeText(url)
       .then(() => {
         setSnackbar({
@@ -195,14 +200,14 @@ const DatabaseDetails = () => {
           severity: 'error'
         });
       });
-
+  
     return url;
   };
 
   const handleMenuAction = (action) => {
     generateandCopyUrlByActionType(dbName, currentTable.tablename, action);
     handleMenuClose();
-
+    
     let message = '';
     switch (action) {
       case 'read':
@@ -217,10 +222,8 @@ const DatabaseDetails = () => {
       case 'delete':
         message = 'Send a POST request with filter object in body';
         break;
-      default:
-        message = '';
     }
-
+    
     setSnackbar(prev => ({
       ...prev,
       message: `${prev.message}\n${message}`
@@ -503,19 +506,6 @@ const DatabaseDetails = () => {
                           >
                             <MoreVertIcon />
                           </IconButton>
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditTable(dbName, table.tablename);
-                            }}
-                            sx={{
-                              color: 'var(--primary-color)',
-                              mr: 1,
-                              float: 'right'
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -524,15 +514,14 @@ const DatabaseDetails = () => {
               </TableContainer>
             </Paper>
           </Box>
-
           <EditTableDialog
-            open={editDialog.open}
-            onClose={() => setEditDialog({ ...editDialog, open: false })}
-            dbName={editDialog.dbName}
-            tableName={editDialog.tableName}
-            columns={editDialog.columns}
-            onSave={handleSaveTableChanges}  // Make sure this is passed correctly
-          />
+  open={editDialog.open}
+  onClose={() => setEditDialog({...editDialog, open: false})}
+  dbName={editDialog.dbName}
+  tableName={editDialog.tableName}
+  columns={editDialog.columns}
+  onSave={handleSaveTableChanges}
+/>
 
           <Menu
             id="table-actions-menu"
@@ -546,6 +535,20 @@ const DatabaseDetails = () => {
             <MenuItem onClick={() => handleMenuAction('update')}>Update Data</MenuItem>
             <MenuItem onClick={() => handleMenuAction('delete')}>Delete Data</MenuItem>
           </Menu>
+          <IconButton
+  size="small"
+  onClick={(e) => {
+    e.stopPropagation();
+    handleEditTable(database.dbname, table.tablename);
+  }}
+  sx={{ 
+    color: 'var(--primary-color)',
+    ml: 0.5,
+    p: 0.5
+  }}
+>
+  <EditIcon fontSize="small" />
+</IconButton>
 
           <Snackbar
             open={snackbar.open}

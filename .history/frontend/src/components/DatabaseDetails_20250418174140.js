@@ -95,7 +95,7 @@ const DatabaseDetails = () => {
 
       setSnackbar({
         open: true,
-        message: response.data?.message,
+        message: response.data?.message || 'Table updated successfully!',
         severity: 'success'
       });
     } catch (error) {

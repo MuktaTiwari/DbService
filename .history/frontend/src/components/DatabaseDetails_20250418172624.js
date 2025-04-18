@@ -47,22 +47,22 @@ const DatabaseDetails = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     })
-      .then(response => {
-        setEditDialog({
-          open: true,
-          dbName,
-          tableName,
-          columns: response.data
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching table columns:', error);
-        setSnackbar({
-          open: true,
-          message: error.response?.data?.error || 'Failed to fetch table columns',
-          severity: 'error'
-        });
+    .then(response => {
+      setEditDialog({
+        open: true,
+        dbName,
+        tableName,
+        columns: response.data
       });
+    })
+    .catch(error => {
+      console.error('Error fetching table columns:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Failed to fetch table columns',
+        severity: 'error'
+      });
+    });
   };
 
   const handleSaveTableChanges = async (dbName, tableName, columns) => {
@@ -76,7 +76,7 @@ const DatabaseDetails = () => {
           }
         }
       );
-
+  
       // Update the local state to reflect changes immediately
       setDatabase(prev => {
         const updatedTables = prev.tables.map(table => {
@@ -89,13 +89,13 @@ const DatabaseDetails = () => {
           }
           return table;
         });
-
+        
         return { ...prev, tables: updatedTables };
       });
-
+  
       setSnackbar({
         open: true,
-        message: response.data?.message,
+        message: response.data?.message || 'Table updated successfully!',
         severity: 'success'
       });
     } catch (error) {
@@ -153,11 +153,11 @@ const DatabaseDetails = () => {
   const generateandCopyUrlByActionType = (dbName, tableName, action) => {
     const baseUrl = process.env.REACT_APP_SERVER_BASE_URL;
     const queryRoute = process.env.REACT_APP_QUERY_ROUTE || '/api/query';
-
+  
     let url = '';
     let method = '';
-
-    switch (action) {
+  
+    switch(action) {
       case 'read':
         url = `${baseUrl}${queryRoute}/${dbName}/${tableName}/get`;
         method = 'POST';
@@ -178,7 +178,7 @@ const DatabaseDetails = () => {
         console.error('Invalid action!!');
         return;
     }
-
+  
     navigator.clipboard.writeText(url)
       .then(() => {
         setSnackbar({
@@ -195,14 +195,14 @@ const DatabaseDetails = () => {
           severity: 'error'
         });
       });
-
+  
     return url;
   };
 
   const handleMenuAction = (action) => {
     generateandCopyUrlByActionType(dbName, currentTable.tablename, action);
     handleMenuClose();
-
+    
     let message = '';
     switch (action) {
       case 'read':
@@ -220,7 +220,7 @@ const DatabaseDetails = () => {
       default:
         message = '';
     }
-
+    
     setSnackbar(prev => ({
       ...prev,
       message: `${prev.message}\n${message}`
@@ -496,25 +496,24 @@ const DatabaseDetails = () => {
                         </TableCell>
                         <TableCell>
                           <IconButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditTable(dbName, table.tablename);
+                            }}
+                            sx={{ 
+                              color: 'var(--primary-color)',
+                              mr: 1
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
                             aria-label="more"
                             aria-controls={`table-menu-${table.tablename}`}
                             aria-haspopup="true"
                             onClick={(e) => handleMenuOpen(e, table)}
                           >
                             <MoreVertIcon />
-                          </IconButton>
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditTable(dbName, table.tablename);
-                            }}
-                            sx={{
-                              color: 'var(--primary-color)',
-                              mr: 1,
-                              float: 'right'
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -527,11 +526,11 @@ const DatabaseDetails = () => {
 
           <EditTableDialog
             open={editDialog.open}
-            onClose={() => setEditDialog({ ...editDialog, open: false })}
+            onClose={() => setEditDialog({...editDialog, open: false})}
             dbName={editDialog.dbName}
             tableName={editDialog.tableName}
             columns={editDialog.columns}
-            onSave={handleSaveTableChanges}  // Make sure this is passed correctly
+            onSave={handleSaveTableChanges}
           />
 
           <Menu

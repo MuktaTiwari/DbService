@@ -637,7 +637,7 @@ router.get('/:dbName/tables/:tableName/columns', verifyToken, async (req, res) =
 
 
 // PUT route to update table structure
-router.put('/:dbName/:tableName', verifyToken, async (req, res) => {
+router.put('/:dbName/tables/:tableName', verifyToken, async (req, res) => {
   const { dbName, tableName } = req.params;
   const { columns } = req.body;
   const userId = req.user.user_id;
@@ -741,6 +741,9 @@ router.put('/:dbName/:tableName', verifyToken, async (req, res) => {
 
     await dbPool.query('COMMIT');
     await client.query('COMMIT');
+
+    res.json({ message: `Table '${tableName}' updated successfully` });
+
   } catch (error) {
     console.error('Error updating table:', error);
     

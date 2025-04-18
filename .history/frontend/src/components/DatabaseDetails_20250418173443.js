@@ -95,7 +95,7 @@ const DatabaseDetails = () => {
 
       setSnackbar({
         open: true,
-        message: response.data?.message,
+        message: response.data?.message || 'Table updated successfully!',
         severity: 'success'
       });
     } catch (error) {
@@ -495,6 +495,7 @@ const DatabaseDetails = () => {
                           ))}
                         </TableCell>
                         <TableCell>
+                          
                           <IconButton
                             aria-label="more"
                             aria-controls={`table-menu-${table.tablename}`}
@@ -502,19 +503,6 @@ const DatabaseDetails = () => {
                             onClick={(e) => handleMenuOpen(e, table)}
                           >
                             <MoreVertIcon />
-                          </IconButton>
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditTable(dbName, table.tablename);
-                            }}
-                            sx={{
-                              color: 'var(--primary-color)',
-                              mr: 1,
-                              float: 'right'
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
                           </IconButton>
                         </TableCell>
                       </TableRow>
