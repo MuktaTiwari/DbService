@@ -45,6 +45,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { styled } from "@mui/material/styles";
 import DashboardCustomizeRoundedIcon from '@mui/icons-material/DashboardCustomizeRounded';
+import axiosInstance from "../utils/axiosInstance";
 
 const drawerWidth = 240;
 
@@ -66,7 +67,7 @@ const Dashboard = () => {
     domainName: "",
     ownerEmail: "",
     firstName: "",
-    lastName:"",
+    lastName: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -97,8 +98,8 @@ const Dashboard = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/api/superadmin/me', {
-          headers: { Authorization: `Bearer ${token}` },
+        const response = await axiosInstance.get('/api/superadmin/me', {
+          // headers: { Authorization: `Bearer ${token}` },
         });
 
         console.log('User data response:', response.data);
@@ -138,7 +139,7 @@ const Dashboard = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/users", {
+      const res = await axiosInstance.get("/api/users", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -162,9 +163,9 @@ const Dashboard = () => {
     setFormData({
       organizationName: "",
       domainName: "",
-      ownerEmail: "",
       firstName: "",
-      lastName:"",
+      lastName: "",
+      ownerEmail: "",
       password: "",
     });
   };
@@ -177,64 +178,104 @@ const Dashboard = () => {
     setShowPassword(!showPassword);
   };
 
+  // const handleSubmit = async () => {
+  //   if (
+  //     !formData.organizationName ||
+  //     !formData.domainName ||
+  //     !formData.ownerEmail ||
+  //     !formData.firstName ||
+  //     !formData.lastName ||
+  //     !formData.password
+  //   ) {
+  //     setSnackbar({
+  //       open: true,
+  //       message: "Please fill in all fields",
+  //       severity: "error",
+  //     });
+  //     return;
+  //   }
+
+  //   const domainRegex = /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+  //   if (!domainRegex.test(formData.domainName)) {
+  //     setSnackbar({
+  //       open: true,
+  //       message: "Invalid domain name format",
+  //       severity: "error",
+  //     });
+  //     return;
+  //   }
+
+  //   const emailDomain = formData.ownerEmail.split("@")[1];
+  //   if (emailDomain !== formData.domainName) {
+  //     setSnackbar({
+  //       open: true,
+  //       message: "Owner email domain must match organization domain",
+  //       severity: "error",
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await axios.post(
+  //       "http://localhost:5000/api/users",
+  //       {
+  //         organizationName: formData.organizationName,
+  //         domainName: formData.domainName,
+  //         ownerEmail: formData.ownerEmail,
+  //         firstName: formData.firstName,
+  //         lastName: formData.lastName,
+  //         password: formData.password,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //       }
+  //     );
+
+  //     setSnackbar({
+  //       open: true,
+  //       message: "Organization created successfully",
+  //       severity: "success",
+  //     });
+
+  //     await fetchUsers();
+  //     handleCloseDialog();
+  //   } catch (error) {
+  //     console.error("Error adding organization:", error);
+  //     setSnackbar({
+  //       open: true,
+  //       message: error.response?.data?.error || "Error creating organization",
+  //       severity: "error",
+  //     });
+  //   }
+  // };
+
   const handleSubmit = async () => {
-    if (
-      !formData.organizationName ||
-      !formData.domainName ||
-      !formData.ownerEmail ||
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.password
-    ) {
-      setSnackbar({
-        open: true,
-        message: "Please fill in all fields",
-        severity: "error",
-      });
-      return;
-    }
-
-    const domainRegex = /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
-    if (!domainRegex.test(formData.domainName)) {
-      setSnackbar({
-        open: true,
-        message: "Invalid domain name format",
-        severity: "error",
-      });
-      return;
-    }
-
-    const emailDomain = formData.ownerEmail.split("@")[1];
-    if (emailDomain !== formData.domainName) {
-      setSnackbar({
-        open: true,
-        message: "Owner email domain must match organization domain",
-        severity: "error",
-      });
-      return;
-    }
+    // Keep your existing validation
 
     try {
       const response = await axios.post(
         "http://localhost:5000/api/users",
         {
-          organizationName: formData.organizationName,
-          domainName: formData.domainName,
-          ownerEmail: formData.ownerEmail,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          organizationName: formData.organizationName.trim(),
+          domainName: formData.domainName.trim().toLowerCase(),
+          ownerEmail: formData.ownerEmail.trim().toLowerCase(),
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
           password: formData.password,
         },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            'Content-Type': 'application/json'
           },
         }
       );
 
       setSnackbar({
         open: true,
-        message: "Organization created successfully",
+        message: "Organization and user created successfully",
         severity: "success",
       });
 
@@ -372,7 +413,7 @@ const Dashboard = () => {
         }}
       >
         <Toolbar>
-          
+
           <IconButton
             color="inherit"
             edge="start"
@@ -457,59 +498,59 @@ const Dashboard = () => {
         }}
       >
         <Toolbar />
-        
+
         <Grid>
-          
+
           <StyledPaper>
-          <Box sx={{ 
-      display: "flex", 
-      justifyContent: "space-between", 
-      alignItems: "center",
-      mb: 3 
-    }}>
-      <Box>
-        <Typography 
-          variant="h6"
-          sx={{ 
-            color: 'var(--text-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}
-        >
-          Welcome, {currentUser?.name || 'Admin'}
-        </Typography>
-        <Typography 
-          variant="subtitle1"
-          sx={{ 
-            color: 'var(--text-secondary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}
-        >
-          Organization: {currentUser?.organization || 'Not specified'}
-        </Typography>
-      </Box>
-      
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={handleOpenDialog}
-        sx={{
-          backgroundColor: "var(--primary-color)",
-          borderRadius: "12px",
-          px: 4,
-          py: 1.5,
-          fontSize: "1rem",
-          "&:hover": {
-            backgroundColor: "var(--primary-hover)",
-          },
-        }}
-      >
-        Add organization
-      </Button>
-    </Box>
+            <Box sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 3
+            }}>
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: 'var(--text-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  Welcome, {currentUser?.name || 'Admin'}
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  Organization: {currentUser?.organization || 'Not specified'}
+                </Typography>
+              </Box>
+
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleOpenDialog}
+                sx={{
+                  backgroundColor: "var(--primary-color)",
+                  borderRadius: "12px",
+                  px: 4,
+                  py: 1.5,
+                  fontSize: "1rem",
+                  "&:hover": {
+                    backgroundColor: "var(--primary-hover)",
+                  },
+                }}
+              >
+                Add organization
+              </Button>
+            </Box>
 
             <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
               <TextField
@@ -544,13 +585,14 @@ const Dashboard = () => {
             </Box>
 
             <TableContainer>
-              
+
               <Table>
                 <TableHead>
                   <TableRow>
                     <TableCell>Organization</TableCell>
                     <TableCell>Domain Name</TableCell>
-                    <TableCell>Fullname</TableCell>
+                    <TableCell>First Name</TableCell>
+                    <TableCell>Last Name</TableCell>
                     <TableCell>Owner Email</TableCell>
                     <TableCell>Date And Time</TableCell>
                     <TableCell>Actions</TableCell>
@@ -574,17 +616,9 @@ const Dashboard = () => {
                       <TableRow key={user.user_id}>
                         <TableCell>{user.organization_name || ""}</TableCell>
                         <TableCell>{user.domain_name || ""}</TableCell>
-                        <TableCell>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            {user.full_name || ""}
-                          </Box>
-                        </TableCell>
+                        <TableCell>{user.first_name || ""}</TableCell>
+                        <TableCell>{user.last_name || ""}</TableCell>
+
                         <TableCell>{user.owner_email || ""}</TableCell>
                         <TableCell>
                           {user.created_at
@@ -654,16 +688,6 @@ const Dashboard = () => {
                   helperText="Must be unique and in correct format (e.g., domain.com)"
                 />
                 <TextField
-                  label="Owner Email"
-                  name="ownerEmail"
-                  type="email"
-                  value={formData.ownerEmail}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  helperText="Email domain must match organization domain"
-                />
-                <TextField
                   label="First Name"
                   name="firstName"
                   value={formData.firstName}
@@ -679,6 +703,16 @@ const Dashboard = () => {
                   onChange={handleChange}
                   fullWidth
                   required
+                />
+                <TextField
+                  label="Owner Email"
+                  name="ownerEmail"
+                  type="email"
+                  value={formData.ownerEmail}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  helperText="Email domain must match organization domain"
                 />
                 <TextField
                   label="Password"

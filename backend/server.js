@@ -24,6 +24,10 @@ app.use(express.json({
 }
 ));
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin:'*',
+  credentials:true
+}))
 
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -127,8 +131,8 @@ const initializeDatabase = async () => {
         org_id UUID PRIMARY KEY,
         organization_name VARCHAR(255) NOT NULL UNIQUE,
         domain VARCHAR(255) NOT NULL,
-        registryId UUID NOT NULL,
-        secondaryERPId UUID NOT NULL,
+        registryId UUID NULL,
+        secondaryERPId UUID NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
