@@ -11,6 +11,7 @@ import axios from 'axios';
 import DatabaseDetails from './components/DatabaseDetails';
 import './styles/theme.css';
 import PricingPlans from './components/PricingPlans';
+import axiosInstance from './utils/axiosInstance';
 
 
 const theme = createTheme({
@@ -36,7 +37,7 @@ function App() {
   useEffect(() => {
     const checkUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/check-users');
+        const response = await axiosInstance.get('/api/auth/check-users');
         setHasUsers(response.data.hasUsers);
       } catch (error) {
         console.error('Error checking users:', error);

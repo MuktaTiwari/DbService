@@ -61,6 +61,7 @@ import UpgradeDialog from "./UpgradeDialog";
 import StoreIcon from "@mui/icons-material/Store";
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
+import axiosInstance from "../utils/axiosInstance";
 
 const drawerWidth = 240;
 
@@ -117,8 +118,8 @@ const DatabaseDetails = () => {
           return;
         }
 
-        const response = await axios.get(
-          "http://localhost:5000/api/superadmin/me",
+        const response = await axiosInstance.get(
+          "/api/superadmin/me",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -170,8 +171,8 @@ const DatabaseDetails = () => {
         severity: "info",
         autoHideDuration: null,
       });
-      const response = await axios.post(
-        `http://localhost:5000/api/databases/${dbName}/create-table`,
+      const response = await axiosInstance.post(
+        `/api/databases/${dbName}/create-table`,
         formData,
         {
           headers: {
@@ -233,8 +234,8 @@ const DatabaseDetails = () => {
 
   const handleSaveTableChanges = async (dbName, tableName, columns) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/databases/${dbName}/${tableName}`,
+      const response = await axiosInstance.put(
+        `/api/databases/${dbName}/${tableName}`,
         { columns },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
@@ -265,8 +266,8 @@ const DatabaseDetails = () => {
 
   const fetchDatabaseDetails = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/databases/${decodeURIComponent(dbName)}`,
+      const response = await axiosInstance.get(
+        `/api/databases/${decodeURIComponent(dbName)}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -392,16 +393,16 @@ const DatabaseDetails = () => {
 
   const handleViewData = async (table) => {
     try {
-      const columnsResponse = await axios.get(
-        `http://localhost:5000/api/databases/${dbName}/tables/${table.tablename}/columns`,
+      const columnsResponse = await axiosInstance.get(
+        `/api/databases/${dbName}/tables/${table.tablename}/columns`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      const dataResponse = await axios.get(
-        `http://localhost:5000/api/databases/${dbName}/tables/${table.tablename}/data`,
+      const dataResponse = await axiosInstance.get(
+        `/api/databases/${dbName}/tables/${table.tablename}/data`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -464,8 +465,8 @@ const DatabaseDetails = () => {
 
   const handleDeleteTable = async () => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/databases/${dbName}/tables/${deleteDialog.tableName}`,
+      await axiosInstance.delete(
+        `/api/databases/${dbName}/tables/${deleteDialog.tableName}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

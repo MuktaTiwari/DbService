@@ -37,6 +37,7 @@ import {
 import { styled } from "@mui/material/styles";
 import axios from "axios";
 import { CiViewTable } from "react-icons/ci";
+import axiosInstance from "../utils/axiosInstance";
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -115,8 +116,8 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
   const fetchAvailableTables = async () => {
     setLoadingTables(true);
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/databases/${dbName}/tables`,
+      const response = await axiosInstance.get(
+        `/api/databases/${dbName}/tables`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -141,8 +142,8 @@ const CreateTableDialog = ({ open, onClose, dbName, onSubmit }) => {
 
     setLoadingColumns(true);
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/databases/${dbName}/tables/${tableName}/columns`,
+      const response = await axiosInstance.get(
+        `/api/databases/${dbName}/tables/${tableName}/columns`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

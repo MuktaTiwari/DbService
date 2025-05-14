@@ -48,6 +48,7 @@ import { Person as PersonIcon } from "@mui/icons-material";
 import { FaDatabase } from "react-icons/fa";
 import { CiViewTable } from "react-icons/ci";
 import DashboardCustomizeRoundedIcon from '@mui/icons-material/DashboardCustomizeRounded';
+import axiosInstance from "../utils/axiosInstance";
 
 
 const drawerWidth = 240;
@@ -111,7 +112,7 @@ const UserDashboard = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/api/superadmin/me', {
+        const response = await axiosInstance.get('/api/superadmin/me', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -149,7 +150,7 @@ const UserDashboard = () => {
 
   const fetchDatabases = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/databases", {
+      const response = await axiosInstance.get("/api/databases", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -176,8 +177,8 @@ const UserDashboard = () => {
 
   const handleDeleteDatabase = async () => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/databases/${deleteDialog.name}`,
+      await axiosInstance.delete(
+        `/api/databases/${deleteDialog.name}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -253,8 +254,8 @@ const UserDashboard = () => {
         autoHideDuration: null,
       });
 
-      const response = await axios.post(
-        "http://localhost:5000/api/databases",
+      const response = await axiosInstance.post(
+        "/api/databases",
         {
           databaseName: formData.databaseName,
         },

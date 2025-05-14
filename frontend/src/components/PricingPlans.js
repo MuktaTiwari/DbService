@@ -47,6 +47,7 @@ import {
 import axios from "axios";
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import axiosInstance from '../utils/axiosInstance';
 
 
 const drawerWidth = 240;
@@ -71,7 +72,7 @@ const PricingPlans = () => {
                     return;
                 }
 
-                const response = await axios.get('http://localhost:5000/api/superadmin/me', {
+                const response = await axiosInstance.get('/api/superadmin/me', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
