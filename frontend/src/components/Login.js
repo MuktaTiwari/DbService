@@ -19,6 +19,7 @@ import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import axiosInstance from '../utils/axiosInstance';
 
 const MainSection = styled('section')({
   minHeight: '100vh',
@@ -100,7 +101,7 @@ const Login = () => {
     }
   
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await axiosInstance.post('/api/auth/login', {
         email: formData.email,
         password: formData.password
       });
@@ -142,7 +143,7 @@ const Login = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/auth/request-reset', {
+      await axiosInstance.post('/api/auth/request-reset', {
         email: resetData.email
       });
 
@@ -177,7 +178,7 @@ const Login = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/auth/reset-password', {
+      await axiosInstance.post('/api/auth/reset-password', {
         email: resetData.email,
         otp: resetData.otp,
         newPassword: resetData.newPassword

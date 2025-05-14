@@ -255,8 +255,8 @@ const Dashboard = () => {
     // Keep your existing validation
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/users",
+      const response = await axiosInstance.post(
+        "/api/users",
         {
           organizationName: formData.organizationName.trim(),
           domainName: formData.domainName.trim().toLowerCase(),
@@ -303,8 +303,8 @@ const Dashboard = () => {
 
   const handleDeleteUser = async () => {
     try {
-      const response = await axios.delete(
-        `http://localhost:5000/api/users/${userToDelete}`,
+      const response = await axiosInstance.delete(
+        `/api/users/${userToDelete}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -389,7 +389,7 @@ const Dashboard = () => {
               }}
             />
           </ListItemIcon>
-          <ListItemText primary="Dashborad" />
+          <ListItemText primary="Dashboard" />
         </ListItem>
       </List>
     </div>

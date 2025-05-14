@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance';
 
 const drawerWidth = 240;
 
@@ -34,7 +35,7 @@ const Organizations = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/users', {
+        const response = await axiosInstance.get('/api/users', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
